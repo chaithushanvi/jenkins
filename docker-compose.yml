@@ -1,0 +1,35 @@
+---
+version: '3.7'
+
+services:
+  jenkins:
+    build: .
+    container_name: jenkins
+    tty: true
+    ports:
+      - "8089:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_data:/var/jenkins_home
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jenkins.rule=Host(`jenkins.localhost`)"
+      - "traefik.http.routers.jenkins.entrypoints=websecure"
+      - "traefik.http.routers.jenkins.tls=true"
+      - "traefik.http.services.jenkins.loadbalancer.server.port=8080"
+
+  portainer:
+    image: portainer/portainer-ce
+    container_name: portainer
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.localhost`)"
+      - "traefik.http.routers.portainer.entrypoints=websecure"
+      - "traefik.http.routers.portainer.tls=true"
+
+volumes:
+  jenkins_data:
+  portainer_data:
